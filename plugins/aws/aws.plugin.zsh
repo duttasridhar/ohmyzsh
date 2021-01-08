@@ -204,3 +204,19 @@ else
   [[ -r $_aws_zsh_completer_path ]] && source $_aws_zsh_completer_path
   unset _aws_zsh_completer_path _brew_prefix
 fi
+
+function asr() {
+    aws_command=(aws sts assume-role --role-arn "$1" --role-session-name sridhartest )
+    aws_command+=(--query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]' --output text)
+    local -a credentials
+    credentials=(${(ps:\t:)"$(${aws_command[@]})"})
+
+    if [[ -n "$credentials" ]]; then
+      aws_access_key_id="${credentials[1]}"
+      aws_secret_access_key="${credentials[2]}"
+      aws_session_token="${credentials[3]}"
+    fi
+    export AWS_ACCESS_KEY_ID="$aws_access_key_id"
+    export AWS_SECRET_ACCESS_KEY="$aws_secret_access_key"
+    export AWS_SESSION_TOKEN="$aws_session_token"
+}
